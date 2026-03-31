@@ -2,7 +2,8 @@ package phase1;
 
 public class StringManipulation {
     public static void main(String[] args) {
-        String fullName = "John Michael Doe";
+        "a b a c d"
+        String fullName = "John Michael Doe ";
 
         // --- Initials ---
         String initials = getInitials(fullName);
@@ -84,5 +85,6 @@ public class StringManipulation {
         }
 
         return trimmed.split("\\s+").length;
+        
     }
 }

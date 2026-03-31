@@ -46,6 +46,7 @@ public class TypeExplorer {
         System.out.println("Autoboxed Integer: " + wrappedInt);
         System.out.println("Unboxed int: " + unwrappedInt);
         System.out.println("Are they equal? " + (myInt == unwrappedInt)); // true
+        System.out.println("Are they identical? " + (myInt == wrappedInt));
 
         // ⚠️ GOTCHA: Comparing wrapper objects with == checks reference, not value!
         Integer a = 200;
@@ -55,6 +56,9 @@ public class TypeExplorer {
         System.out.println("a.equals(b) (value):   " + a.equals(b)); // true!
         // In JS, 200 === 200 is always true. In Java, use .equals() for wrapper
         // objects.
+        int a_1 = 200;
+        int b_1 = 200;
+        System.out.println("a_1 == b_1 (primitive): " + (a_1 == b_1));
 
         // --- Type casting ---
         System.out.println("\n=== Type Casting ===");
