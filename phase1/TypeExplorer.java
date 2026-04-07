@@ -11,7 +11,7 @@ public class TypeExplorer {
         double myDouble = 3.14159265; // 64-bit decimal (default for decimals)
         char myChar = 'A'; // 16-bit Unicode character (JS has no char type)
         boolean myBool = true; // true or false only (not truthy/falsy like JS!)
-
+		
         // --- Print each value ---
         System.out.println("=== Primitive Types ===");
         System.out.println("byte:    " + myByte);
@@ -71,3 +71,5 @@ public class TypeExplorer {
         System.out.println("double 9.99 cast to int: " + truncated); // 9
     }
 }
+
+
