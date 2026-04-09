@@ -14,26 +14,29 @@ public class TemperatureConverter {
             try {
                 float value = Float.parseFloat(degree);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Degree must be a valid number");
+                System.out.printf("Degree must be a valid number\n");
+                return;
             }
 
             result = (Float.parseFloat(degree)-32) * 5/9;
-            System.out.printf("It is %.2f C\n",result);
+            System.out.printf("It is %.2f C \n",result);
                 
         }
+
         else if(type.equals("C")){
             System.out.println("Converting to Farenheit");
             try {
                 float value = Float.parseFloat(degree);
             } catch (NumberFormatException e) {
-                throw new IllegalArgumentException("Degree must be a valid number");
+                System.out.printf("Degree must be a valid number\n");
+                return;
             }
 
             result = (Float.parseFloat(degree) * 9/5) + 32;
             System.out.printf("It is %.2f C\n",result);
 
         }else{
-            throw new IllegalArgumentException("Temperature type must be F or C");
+            System.out.print("Temperature type must be F or C");
         }
 
     }
