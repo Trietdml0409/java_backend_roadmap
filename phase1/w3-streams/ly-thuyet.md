@@ -20,6 +20,7 @@ const result = users
     .filter(u => u.age >= 18)
     .map(u => u.name)
     .sort();
+
 ```
 
 Hoặc trong Python:
@@ -100,6 +101,7 @@ Stream<User> filtered = users.stream()
         return u.getName();
     });
 
+
 System.out.println("Chưa có output nào ở trên!");
 
 // BÂY GIỜ mới chạy — khi gặp terminal operation
@@ -115,11 +117,13 @@ List<String> result = filtered.collect(Collectors.toList());
 
 **So sánh với JS:** Trong JavaScript, `.filter()` và `.map()` chạy **ngay lập tức** và tạo array trung gian. Java Stream **không tạo collection trung gian** — mỗi phần tử đi qua toàn bộ pipeline trước khi phần tử tiếp theo bắt đầu.
 
-| Đặc điểm | Java Streams | JS Array methods | Python list comprehension |
-|-----------|-------------|-----------------|--------------------------|
-| Thời điểm chạy | Lazy (khi gặp terminal op) | Eager (chạy ngay) | Eager (chạy ngay) |
-| Collection trung gian | Không tạo | Tạo array mới mỗi bước | Tạo list mới |
-| Short-circuit | Có (findFirst, limit...) | Không (.find() có nhưng .filter().map() không) | Generator thì có |
+
+| Đặc điểm              | Java Streams               | JS Array methods                               | Python list comprehension |
+| --------------------- | -------------------------- | ---------------------------------------------- | ------------------------- |
+| Thời điểm chạy        | Lazy (khi gặp terminal op) | Eager (chạy ngay)                              | Eager (chạy ngay)         |
+| Collection trung gian | Không tạo                  | Tạo array mới mỗi bước                         | Tạo list mới              |
+| Short-circuit         | Có (findFirst, limit...)   | Không (.find() có nhưng .filter().map() không) | Generator thì có          |
+
 
 #### Quy tắc 2: Stream KHÔNG thay đổi source collection
 
@@ -147,10 +151,12 @@ stream.forEach(System.out::println); // IllegalStateException!
 
 Đây là điểm khác biệt lớn so với Python generators (cũng dùng một lần) nhưng khác với JS arrays (dùng lại thoải mái):
 
-| | Java Stream | Python Generator | JS Array |
-|-|-------------|-----------------|----------|
-| Dùng lại | Không | Không | Có |
-| Lazy | Có | Có | Không |
+
+|          | Java Stream | Python Generator | JS Array |
+| -------- | ----------- | ---------------- | -------- |
+| Dùng lại | Không       | Không            | Có       |
+| Lazy     | Có          | Có               | Không    |
+
 
 ---
 
@@ -158,7 +164,7 @@ stream.forEach(System.out::println); // IllegalStateException!
 
 Tất cả intermediate operations đều **trả về một Stream mới** và **không chạy cho đến khi gặp terminal operation**.
 
-### 2.1 filter(Predicate\<T\>)
+### 2.1 filter(PredicateT)
 
 Giữ lại các phần tử thoả mãn điều kiện.
 
@@ -181,7 +187,7 @@ List<Integer> evens = numbers.stream()
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 map(Function\<T, R\>)
+### 2.2 map(FunctionT, R)
 
 Biến đổi mỗi phần tử từ kiểu T sang kiểu R.
 
@@ -210,7 +216,7 @@ List<Integer> lengths = names.stream()
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.3 flatMap(Function\<T, Stream\<R\>\>)
+### 2.3 flatMap(FunctionT, StreamR)
 
 "Phẳng hóa" (flatten) các stream lồng nhau. Chi tiết ở Phần 6.
 
@@ -237,7 +243,7 @@ List<String> flat = nested.stream()
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.4 sorted() và sorted(Comparator\<T\>)
+### 2.4 sorted() và sorted(ComparatorT)
 
 Sắp xếp các phần tử.
 
@@ -299,7 +305,7 @@ List<Integer> unique = numbers.stream()
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.6 peek(Consumer\<T\>)
+### 2.6 peek(ConsumerT)
 
 Thực hiện side-effect (thường là logging/debug) mà **không thay đổi** phần tử. Dùng để debug pipeline.
 
@@ -322,8 +328,10 @@ List<String> result = List.of("one", "two", "three", "four").stream()
 
 ### 2.7 limit(long n) và skip(long n)
 
-`limit(n)` — lấy tối đa n phần tử đầu tiên.
-`skip(n)` — bỏ qua n phần tử đầu tiên.
+page: 3 perPage = 10. 100 phần tử (products) - pagination
+
+`limit(n)` — lấy tối đa n phần tử đầu tiên. 10  
+`skip(n)` — bỏ qua n phần tử đầu tiên. 20 phần tử
 
 ```java
 List<Integer> numbers = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
@@ -362,17 +370,19 @@ List<Integer> page2 = numbers.stream()
 
 ### 2.8 Bảng Tổng Hợp Intermediate Operations
 
-| Operation | Kiểu | Mô tả | Ví dụ |
-|-----------|-------|--------|-------|
-| `filter(Predicate)` | Stateless | Lọc phần tử theo điều kiện | `.filter(x -> x > 0)` |
-| `map(Function)` | Stateless | Biến đổi mỗi phần tử | `.map(String::toUpperCase)` |
-| `flatMap(Function)` | Stateless | Phẳng hóa stream lồng nhau | `.flatMap(Collection::stream)` |
-| `sorted()` | Stateful | Sắp xếp (natural order) | `.sorted()` |
-| `sorted(Comparator)` | Stateful | Sắp xếp theo comparator | `.sorted(Comparator.reverseOrder())` |
-| `distinct()` | Stateful | Loại bỏ trùng lặp | `.distinct()` |
-| `peek(Consumer)` | Stateless | Side-effect (debug) | `.peek(System.out::println)` |
-| `limit(long)` | Short-circuit | Lấy tối đa n phần tử | `.limit(5)` |
-| `skip(long)` | Stateless | Bỏ qua n phần tử đầu | `.skip(3)` |
+
+| Operation            | Kiểu          | Mô tả                      | Ví dụ                                |
+| -------------------- | ------------- | -------------------------- | ------------------------------------ |
+| `filter(Predicate)`  | Stateless     | Lọc phần tử theo điều kiện | `.filter(x -> x > 0)`                |
+| `map(Function)`      | Stateless     | Biến đổi mỗi phần tử       | `.map(String::toUpperCase)`          |
+| `flatMap(Function)`  | Stateless     | Phẳng hóa stream lồng nhau | `.flatMap(Collection::stream)`       |
+| `sorted()`           | Stateful      | Sắp xếp (natural order)    | `.sorted()`                          |
+| `sorted(Comparator)` | Stateful      | Sắp xếp theo comparator    | `.sorted(Comparator.reverseOrder())` |
+| `distinct()`         | Stateful      | Loại bỏ trùng lặp          | `.distinct()`                        |
+| `peek(Consumer)`     | Stateless     | Side-effect (debug)        | `.peek(System.out::println)`         |
+| `limit(long)`        | Short-circuit | Lấy tối đa n phần tử       | `.limit(5)`                          |
+| `skip(long)`         | Stateless     | Bỏ qua n phần tử đầu       | `.skip(3)`                           |
+
 
 **Stateless vs Stateful:**
 
@@ -412,13 +422,15 @@ List<String> names = users.stream()
 names.add("New");  // UnsupportedOperationException!
 ```
 
-| | `collect(Collectors.toList())` | `.toList()` (Java 16+) |
-|-|-------------------------------|------------------------|
-| Kết quả | Mutable ArrayList | Unmodifiable List |
-| Thêm/xóa phần tử | Được | UnsupportedOperationException |
-| Null elements | Cho phép | Cho phép |
 
-### 3.3 forEach(Consumer\<T\>)
+|                  | `collect(Collectors.toList())` | `.toList()` (Java 16+)        |
+| ---------------- | ------------------------------ | ----------------------------- |
+| Kết quả          | Mutable ArrayList              | Unmodifiable List             |
+| Thêm/xóa phần tử | Được                           | UnsupportedOperationException |
+| Null elements    | Cho phép                       | Cho phép                      |
+
+
+### 3.3 forEach(ConsumerT)
 
 Thực hiện hành động trên mỗi phần tử. **Không trả về giá trị** (void).
 
@@ -478,12 +490,14 @@ Optional<String> first = List.of("alpha", "beta", "gamma").stream()
 first.ifPresent(System.out::println); // "beta"
 ```
 
-| | `findFirst()` | `findAny()` |
-|-|---------------|-------------|
-| Kết quả | Phần tử đầu tiên theo thứ tự | Bất kỳ phần tử nào |
-| Sequential stream | Giống nhau | Giống nhau |
-| Parallel stream | Luôn trả về phần tử đầu tiên | Có thể trả về bất kỳ (nhanh hơn) |
-| Khi nào dùng | Cần kết quả xác định | Chỉ cần biết có tồn tại |
+
+|                   | `findFirst()`                | `findAny()`                      |
+| ----------------- | ---------------------------- | -------------------------------- |
+| Kết quả           | Phần tử đầu tiên theo thứ tự | Bất kỳ phần tử nào               |
+| Sequential stream | Giống nhau                   | Giống nhau                       |
+| Parallel stream   | Luôn trả về phần tử đầu tiên | Có thể trả về bất kỳ (nhanh hơn) |
+| Khi nào dùng      | Cần kết quả xác định         | Chỉ cần biết có tồn tại          |
+
 
 **So sánh:**
 
@@ -512,11 +526,13 @@ boolean noneNegative = numbers.stream().noneMatch(n -> n < 0);
 // true — phải kiểm tra hết
 ```
 
-| Operation | Mô tả | Short-circuit khi |
-|-----------|--------|-------------------|
-| `anyMatch(predicate)` | Có **ít nhất một** phần tử thoả mãn? | Tìm thấy phần tử thoả → `true` |
-| `allMatch(predicate)` | **Tất cả** phần tử đều thoả mãn? | Tìm thấy phần tử không thoả → `false` |
-| `noneMatch(predicate)` | **Không có** phần tử nào thoả mãn? | Tìm thấy phần tử thoả → `false` |
+
+| Operation              | Mô tả                                | Short-circuit khi                     |
+| ---------------------- | ------------------------------------ | ------------------------------------- |
+| `anyMatch(predicate)`  | Có **ít nhất một** phần tử thoả mãn? | Tìm thấy phần tử thoả → `true`        |
+| `allMatch(predicate)`  | **Tất cả** phần tử đều thoả mãn?     | Tìm thấy phần tử không thoả → `false` |
+| `noneMatch(predicate)` | **Không có** phần tử nào thoả mãn?   | Tìm thấy phần tử thoả → `false`       |
+
 
 **So sánh:**
 
@@ -562,20 +578,22 @@ Optional<User> youngest = users.stream()
 
 ### 3.9 Bảng Tổng Hợp Terminal Operations
 
-| Operation | Kiểu trả về | Short-circuit | Mô tả |
-|-----------|-------------|---------------|--------|
-| `collect(Collector)` | R | Không | Thu thập vào collection/cấu trúc |
-| `toList()` (Java 16+) | `List<T>` | Không | Thu thập vào unmodifiable list |
-| `forEach(Consumer)` | `void` | Không | Thực hiện action lên mỗi phần tử |
-| `reduce(identity, accumulator)` | T | Không | Gộp thành một giá trị |
-| `count()` | `long` | Không | Đếm số phần tử |
-| `findFirst()` | `Optional<T>` | Có | Phần tử đầu tiên |
-| `findAny()` | `Optional<T>` | Có | Bất kỳ phần tử nào |
-| `anyMatch(Predicate)` | `boolean` | Có | Ít nhất một thoả mãn? |
-| `allMatch(Predicate)` | `boolean` | Có | Tất cả thoả mãn? |
-| `noneMatch(Predicate)` | `boolean` | Có | Không có phần tử nào thoả mãn? |
-| `min(Comparator)` | `Optional<T>` | Không | Phần tử nhỏ nhất |
-| `max(Comparator)` | `Optional<T>` | Không | Phần tử lớn nhất |
+
+| Operation                       | Kiểu trả về   | Short-circuit | Mô tả                            |
+| ------------------------------- | ------------- | ------------- | -------------------------------- |
+| `collect(Collector)`            | R             | Không         | Thu thập vào collection/cấu trúc |
+| `toList()` (Java 16+)           | `List<T>`     | Không         | Thu thập vào unmodifiable list   |
+| `forEach(Consumer)`             | `void`        | Không         | Thực hiện action lên mỗi phần tử |
+| `reduce(identity, accumulator)` | T             | Không         | Gộp thành một giá trị            |
+| `count()`                       | `long`        | Không         | Đếm số phần tử                   |
+| `findFirst()`                   | `Optional<T>` | Có            | Phần tử đầu tiên                 |
+| `findAny()`                     | `Optional<T>` | Có            | Bất kỳ phần tử nào               |
+| `anyMatch(Predicate)`           | `boolean`     | Có            | Ít nhất một thoả mãn?            |
+| `allMatch(Predicate)`           | `boolean`     | Có            | Tất cả thoả mãn?                 |
+| `noneMatch(Predicate)`          | `boolean`     | Có            | Không có phần tử nào thoả mãn?   |
+| `min(Comparator)`               | `Optional<T>` | Không         | Phần tử nhỏ nhất                 |
+| `max(Comparator)`               | `Optional<T>` | Không         | Phần tử lớn nhất                 |
+
 
 ---
 
@@ -623,13 +641,16 @@ Map<String, Integer> nameToAge = users.stream()
         User::name,    // keyMapper
         User::age      // valueMapper
     ));
-// {An=25, Bình=30, Cường=22}
+// {An=25, Bình=30, Cường=22} => Map
+// HashMap new_key = hashFunc(key) . {A = 25, B = 30, C = 22}
+
 
 // Nếu có key trùng → ném IllegalStateException!
 // Giải quyết bằng mergeFunction:
 List<User> withDuplicates = List.of(
     new User("An", 25),
-    new User("An", 30)  // trùng key "An"
+    new User("An", 30),  // trùng key "An",
+    new User("An", 27)
 );
 
 Map<String, Integer> resolved = withDuplicates.stream()
@@ -751,7 +772,18 @@ Map<String, Map<String, List<Employee>>> nested = employees.stream()
 //     Junior → [Em]
 //   }
 // }
+
+{
+     Nam: { 
+         Toan: 40xStudent
+         Van: 40xStudent 
+     Nu: {
+          Toan
+          Van
+}
 ```
+
+
 
 **So sánh:**
 
@@ -796,11 +828,13 @@ Map<Boolean, Long> countPassFail = students.stream()
 
 **partitioningBy vs groupingBy:**
 
-| | `partitioningBy` | `groupingBy` |
-|-|-----------------|-------------|
-| Số nhóm | Luôn 2 (true/false) | Không giới hạn |
-| Key type | `Boolean` | Bất kỳ |
+
+|           | `partitioningBy`         | `groupingBy`           |
+| --------- | ------------------------ | ---------------------- |
+| Số nhóm   | Luôn 2 (true/false)      | Không giới hạn         |
+| Key type  | `Boolean`                | Bất kỳ                 |
 | Nhóm rỗng | Luôn có cả true và false | Chỉ có nhóm có phần tử |
+
 
 ### 4.5 joining() — Nối Chuỗi
 
@@ -878,20 +912,22 @@ Map<String, Integer> totalGradeByMajor = students.stream()
 
 ### 4.8 Bảng Tổng Hợp Collectors
 
-| Collector | Kết quả | Ví dụ |
-|-----------|---------|-------|
-| `toList()` | `List<T>` | `.collect(toList())` |
-| `toSet()` | `Set<T>` | `.collect(toSet())` |
-| `toUnmodifiableList()` | Immutable `List<T>` | `.collect(toUnmodifiableList())` |
-| `toMap(keyFn, valFn)` | `Map<K,V>` | `.collect(toMap(User::name, User::age))` |
-| `groupingBy(classifier)` | `Map<K, List<T>>` | `.collect(groupingBy(User::dept))` |
-| `groupingBy(classifier, downstream)` | `Map<K, D>` | `.collect(groupingBy(User::dept, counting()))` |
-| `partitioningBy(predicate)` | `Map<Boolean, List<T>>` | `.collect(partitioningBy(u -> u.age > 18))` |
-| `joining(delimiter)` | `String` | `.collect(joining(", "))` |
-| `summarizingInt(fn)` | `IntSummaryStatistics` | `.collect(summarizingInt(User::age))` |
-| `counting()` | `Long` | Dùng làm downstream |
-| `mapping(fn, downstream)` | Tuỳ downstream | Dùng làm downstream |
-| `reducing(identity, fn, op)` | `T` | Dùng làm downstream |
+
+| Collector                            | Kết quả                 | Ví dụ                                          |
+| ------------------------------------ | ----------------------- | ---------------------------------------------- |
+| `toList()`                           | `List<T>`               | `.collect(toList())`                           |
+| `toSet()`                            | `Set<T>`                | `.collect(toSet())`                            |
+| `toUnmodifiableList()`               | Immutable `List<T>`     | `.collect(toUnmodifiableList())`               |
+| `toMap(keyFn, valFn)`                | `Map<K,V>`              | `.collect(toMap(User::name, User::age))`       |
+| `groupingBy(classifier)`             | `Map<K, List<T>>`       | `.collect(groupingBy(User::dept))`             |
+| `groupingBy(classifier, downstream)` | `Map<K, D>`             | `.collect(groupingBy(User::dept, counting()))` |
+| `partitioningBy(predicate)`          | `Map<Boolean, List<T>>` | `.collect(partitioningBy(u -> u.age > 18))`    |
+| `joining(delimiter)`                 | `String`                | `.collect(joining(", "))`                      |
+| `summarizingInt(fn)`                 | `IntSummaryStatistics`  | `.collect(summarizingInt(User::age))`          |
+| `counting()`                         | `Long`                  | Dùng làm downstream                            |
+| `mapping(fn, downstream)`            | Tuỳ downstream          | Dùng làm downstream                            |
+| `reducing(identity, fn, op)`         | `T`                     | Dùng làm downstream                            |
+
 
 ---
 
@@ -995,15 +1031,17 @@ int totalLength = List.of("An", "Bình", "Cường").stream()
 
 Identity phải thoả mãn: `accumulator(identity, x) == x` cho mọi x.
 
-| Phép toán | Identity | Giải thích |
-|-----------|----------|-----------|
-| Cộng | `0` | `0 + x = x` |
-| Nhân | `1` | `1 * x = x` |
-| Nối chuỗi | `""` | `"" + s = s` |
+
+| Phép toán | Identity            | Giải thích        |
+| --------- | ------------------- | ----------------- |
+| Cộng      | `0`                 | `0 + x = x`       |
+| Nhân      | `1`                 | `1 * x = x`       |
+| Nối chuỗi | `""`                | `"" + s = s`      |
 | Max (int) | `Integer.MIN_VALUE` | `max(MIN, x) = x` |
 | Min (int) | `Integer.MAX_VALUE` | `min(MAX, x) = x` |
-| AND logic | `true` | `true && x = x` |
-| OR logic | `false` | `false \|\| x = x` |
+| AND logic | `true`              | `true && x = x`   |
+| OR logic  | `false`             | `false            |
+
 
 ### 5.4 Khi Nào Dùng reduce() vs Collectors
 
@@ -1041,8 +1079,8 @@ List<Order> orders = List.of(
 // Vấn đề: muốn lấy TẤT CẢ items → nhưng map cho ra Stream<List<String>>
 Stream<List<String>> nested = orders.stream()
     .map(Order::items);
-// Stream chứa: [["Laptop","Mouse"], ["Keyboard","Monitor","USB"]]
-// → Chúng ta muốn: ["Laptop","Mouse","Keyboard","Monitor","USB"]
+// Stream chứa: [["Laptop","Mouse"], ["Keyboard","Monitor","USB"]] => nested list (2D)
+// → Chúng ta muốn: ["Laptop","Mouse","Keyboard","Monitor","USB"] => list 1 Dimension (1D) 
 ```
 
 ### 6.2 Giải Pháp: flatMap
@@ -1053,7 +1091,7 @@ Stream<List<String>> nested = orders.stream()
 List<String> allItems = orders.stream()
     .flatMap(order -> order.items().stream())  // List<String> → Stream<String>
     .collect(Collectors.toList());
-// ["Laptop", "Mouse", "Keyboard", "Monitor", "USB"]
+// ["Laptop", "Mouse", "Keyboard", "Monitor", "USB"] => list 1D
 ```
 
 ASCII diagram:
@@ -1091,7 +1129,7 @@ List<String> sentences = List.of(
 );
 
 List<String> words = sentences.stream()
-    .flatMap(sentence -> Arrays.stream(sentence.split(" ")))
+    .flatMap(sentence -> Arrays.stream(sentence.split(" "))) // => .map: [["Hello", "World"], ["Java",..], ["flatMap", ...] ]
     .collect(Collectors.toList());
 // ["Hello", "World", "Java", "Streams", "are", "powerful", "flatMap", "is", "useful"]
 ```
@@ -1200,14 +1238,16 @@ int sum2 = numbers.stream()
 
 ### 7.3 Khi Nào NÊN Dùng Parallel Streams
 
-| Tiêu chí | Nên dùng parallel | Không nên dùng parallel |
-|-----------|-------------------|------------------------|
-| Kích thước dữ liệu | > 10,000 phần tử | < 1,000 phần tử |
-| Kiểu operation | Stateless (filter, map) | Stateful (sorted, distinct) |
-| Source | ArrayList, arrays, IntStream.range | LinkedList, Stream.iterate |
-| Tính toán mỗi phần tử | Nặng (CPU-intensive) | Nhẹ (simple comparison) |
-| Thread safety | Operations không có side-effects | Ghi vào shared state |
-| Môi trường | Standalone application | Web server (đã dùng thread pool) |
+
+| Tiêu chí              | Nên dùng parallel                  | Không nên dùng parallel          |
+| --------------------- | ---------------------------------- | -------------------------------- |
+| Kích thước dữ liệu    | > 10,000 phần tử                   | < 1,000 phần tử                  |
+| Kiểu operation        | Stateless (filter, map)            | Stateful (sorted, distinct)      |
+| Source                | ArrayList, arrays, IntStream.range | LinkedList, Stream.iterate       |
+| Tính toán mỗi phần tử | Nặng (CPU-intensive)               | Nhẹ (simple comparison)          |
+| Thread safety         | Operations không có side-effects   | Ghi vào shared state             |
+| Môi trường            | Standalone application             | Web server (đã dùng thread pool) |
+
 
 ### 7.4 Khi Nào KHÔNG NÊN Dùng
 
@@ -1426,27 +1466,29 @@ List<Integer> boxed = Arrays.stream(intArr)
 
 ### 8.5 Tổng Hợp So Sánh Java Streams vs Python vs JavaScript
 
-| Thao tác | Java Streams | Python | JavaScript/TypeScript |
-|----------|-------------|--------|----------------------|
-| Filter | `.filter(x -> x > 5)` | `[x for x in l if x > 5]` | `.filter(x => x > 5)` |
-| Map | `.map(x -> x * 2)` | `[x * 2 for x in l]` | `.map(x => x * 2)` |
-| FlatMap | `.flatMap(Collection::stream)` | `[i for sub in l for i in sub]` | `.flatMap(x => x)` |
-| Sort | `.sorted(comp)` | `sorted(l, key=f)` | `.sort((a,b) => ...)` |
-| Distinct | `.distinct()` | `list(set(l))` | `[...new Set(a)]` |
-| Take N | `.limit(n)` | `l[:n]` | `.slice(0, n)` |
-| Skip N | `.skip(n)` | `l[n:]` | `.slice(n)` |
-| Reduce | `.reduce(init, fn)` | `reduce(fn, l, init)` | `.reduce(fn, init)` |
-| Group by | `groupingBy(fn)` | `groupby(sorted(l))` | `Object.groupBy(a, fn)` |
-| Count | `.count()` | `len(l)` | `.length` |
-| Find first | `.findFirst()` → `Optional` | `next(gen, None)` | `.find(fn)` |
-| Any match | `.anyMatch(fn)` | `any(gen)` | `.some(fn)` |
-| All match | `.allMatch(fn)` | `all(gen)` | `.every(fn)` |
-| Join strings | `joining(", ")` | `", ".join(l)` | `.join(", ")` |
-| Min/Max | `.min(comp)` / `.max(comp)` | `min(l)` / `max(l)` | `Math.min(...a)` / `Math.max(...a)` |
-| Frequency | `groupingBy(identity(), counting())` | `Counter(l)` | `reduce` + object |
-| Lazy? | Co (lazy) | List comp: khong, Generator: co | Khong (eager) |
-| Immutable source? | Co | Co (tao list moi) | `.sort()` mutates! |
-| Reusable? | Khong (1 lan) | Generator: khong, List: co | Co |
+
+| Thao tác          | Java Streams                         | Python                          | JavaScript/TypeScript               |
+| ----------------- | ------------------------------------ | ------------------------------- | ----------------------------------- |
+| Filter            | `.filter(x -> x > 5)`                | `[x for x in l if x > 5]`       | `.filter(x => x > 5)`               |
+| Map               | `.map(x -> x * 2)`                   | `[x * 2 for x in l]`            | `.map(x => x * 2)`                  |
+| FlatMap           | `.flatMap(Collection::stream)`       | `[i for sub in l for i in sub]` | `.flatMap(x => x)`                  |
+| Sort              | `.sorted(comp)`                      | `sorted(l, key=f)`              | `.sort((a,b) => ...)`               |
+| Distinct          | `.distinct()`                        | `list(set(l))`                  | `[...new Set(a)]`                   |
+| Take N            | `.limit(n)`                          | `l[:n]`                         | `.slice(0, n)`                      |
+| Skip N            | `.skip(n)`                           | `l[n:]`                         | `.slice(n)`                         |
+| Reduce            | `.reduce(init, fn)`                  | `reduce(fn, l, init)`           | `.reduce(fn, init)`                 |
+| Group by          | `groupingBy(fn)`                     | `groupby(sorted(l))`            | `Object.groupBy(a, fn)`             |
+| Count             | `.count()`                           | `len(l)`                        | `.length`                           |
+| Find first        | `.findFirst()` → `Optional`          | `next(gen, None)`               | `.find(fn)`                         |
+| Any match         | `.anyMatch(fn)`                      | `any(gen)`                      | `.some(fn)`                         |
+| All match         | `.allMatch(fn)`                      | `all(gen)`                      | `.every(fn)`                        |
+| Join strings      | `joining(", ")`                      | `", ".join(l)`                  | `.join(", ")`                       |
+| Min/Max           | `.min(comp)` / `.max(comp)`          | `min(l)` / `max(l)`             | `Math.min(...a)` / `Math.max(...a)` |
+| Frequency         | `groupingBy(identity(), counting())` | `Counter(l)`                    | `reduce` + object                   |
+| Lazy?             | Co (lazy)                            | List comp: khong, Generator: co | Khong (eager)                       |
+| Immutable source? | Co                                   | Co (tao list moi)               | `.sort()` mutates!                  |
+| Reusable?         | Khong (1 lan)                        | Generator: khong, List: co      | Co                                  |
+
 
 ---
 
@@ -1454,26 +1496,28 @@ List<Integer> boxed = Arrays.stream(intArr)
 
 ### Bảng Tóm Tắt Stream API
 
-| Khái niệm | Điểm chính | Ghi nhớ |
-|------------|-----------|---------|
-| **Stream Pipeline** | Source → Intermediate ops → Terminal op | Stream là "kế hoạch thực thi", không phải cấu trúc dữ liệu |
-| **Lazy evaluation** | Intermediate ops không chạy cho đến khi gặp terminal op | Khác JS array methods (eager). Giống Python generators |
-| **Single use** | Một stream chỉ dùng được một lần | Gọi terminal op lần 2 → `IllegalStateException` |
-| **Immutable source** | Stream không thay đổi collection gốc | An toàn — source collection vẫn nguyên vẹn |
-| **filter** | Lọc phần tử theo Predicate | `stream.filter(x -> x > 0)` |
-| **map** | Biến đổi T → R | `stream.map(String::toUpperCase)` |
-| **flatMap** | Phẳng hoá stream lồng nhau | `Stream<List<T>>` → `Stream<T>` |
-| **sorted** | Sắp xếp (stateful) | Không mutate source (khác JS `.sort()`) |
-| **distinct** | Loại bỏ trùng lặp (dựa trên `.equals()`) | Tương đương `[...new Set(arr)]` trong JS |
-| **limit / skip** | Lấy/bỏ N phần tử đầu | Phân trang: `.skip((page-1)*size).limit(size)` |
-| **collect** | Thu thập kết quả vào collection | `Collectors.toList()`, `toSet()`, `toMap()` |
-| **toList()** | Java 16+ shorthand | Trả về **unmodifiable** list |
-| **reduce** | Gộp thành một giá trị | Identity ở ĐẦU (khác JS/Python ở cuối) |
-| **groupingBy** | Nhóm phần tử (như SQL GROUP BY) | Hỗ trợ downstream: `groupingBy(fn, counting())` |
-| **partitioningBy** | Chia 2 nhóm true/false | Luôn có cả 2 key, kể cả nhóm rỗng |
-| **joining** | Nối chuỗi | `joining(", ", "[", "]")` — delimiter, prefix, suffix |
-| **Parallel streams** | Chia dữ liệu cho nhiều thread (Fork/Join) | Chỉ dùng khi: data lớn, CPU-intensive, stateless ops |
-| **Thread safety** | Parallel stream + shared mutable state = BUG | Dùng `collect()` thay vì `forEach` + shared list |
+
+| Khái niệm            | Điểm chính                                              | Ghi nhớ                                                    |
+| -------------------- | ------------------------------------------------------- | ---------------------------------------------------------- |
+| **Stream Pipeline**  | Source → Intermediate ops → Terminal op                 | Stream là "kế hoạch thực thi", không phải cấu trúc dữ liệu |
+| **Lazy evaluation**  | Intermediate ops không chạy cho đến khi gặp terminal op | Khác JS array methods (eager). Giống Python generators     |
+| **Single use**       | Một stream chỉ dùng được một lần                        | Gọi terminal op lần 2 → `IllegalStateException`            |
+| **Immutable source** | Stream không thay đổi collection gốc                    | An toàn — source collection vẫn nguyên vẹn                 |
+| **filter**           | Lọc phần tử theo Predicate                              | `stream.filter(x -> x > 0)`                                |
+| **map**              | Biến đổi T → R                                          | `stream.map(String::toUpperCase)`                          |
+| **flatMap**          | Phẳng hoá stream lồng nhau                              | `Stream<List<T>>` → `Stream<T>`                            |
+| **sorted**           | Sắp xếp (stateful)                                      | Không mutate source (khác JS `.sort()`)                    |
+| **distinct**         | Loại bỏ trùng lặp (dựa trên `.equals()`)                | Tương đương `[...new Set(arr)]` trong JS                   |
+| **limit / skip**     | Lấy/bỏ N phần tử đầu                                    | Phân trang: `.skip((page-1)*size).limit(size)`             |
+| **collect**          | Thu thập kết quả vào collection                         | `Collectors.toList()`, `toSet()`, `toMap()`                |
+| **toList()**         | Java 16+ shorthand                                      | Trả về **unmodifiable** list                               |
+| **reduce**           | Gộp thành một giá trị                                   | Identity ở ĐẦU (khác JS/Python ở cuối)                     |
+| **groupingBy**       | Nhóm phần tử (như SQL GROUP BY)                         | Hỗ trợ downstream: `groupingBy(fn, counting())`            |
+| **partitioningBy**   | Chia 2 nhóm true/false                                  | Luôn có cả 2 key, kể cả nhóm rỗng                          |
+| **joining**          | Nối chuỗi                                               | `joining(", ", "[", "]")` — delimiter, prefix, suffix      |
+| **Parallel streams** | Chia dữ liệu cho nhiều thread (Fork/Join)               | Chỉ dùng khi: data lớn, CPU-intensive, stateless ops       |
+| **Thread safety**    | Parallel stream + shared mutable state = BUG            | Dùng `collect()` thay vì `forEach` + shared list           |
+
 
 ### Quy Tắc Vàng
 
@@ -1486,3 +1530,4 @@ List<Integer> boxed = Arrays.stream(intArr)
 6. collect() cho collection, reduce() cho single value
 7. groupingBy + downstream collector = công cụ mạnh nhất của Collectors
 ```
+
