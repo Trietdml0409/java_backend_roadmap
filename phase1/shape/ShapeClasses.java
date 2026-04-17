@@ -45,7 +45,6 @@ class Circle extends Shape implements Drawable{
     public String describe(){
         return String.format("This is a Circle, with the area of: %.2f and the perimeter of: %.2f",
                      area(), perimeter());
-
     }
 
     @Override
